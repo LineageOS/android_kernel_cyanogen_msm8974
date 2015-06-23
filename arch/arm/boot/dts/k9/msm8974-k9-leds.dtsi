@@ -1,0 +1,167 @@
+/*
+ * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/include/ "../msm8974-leds.dtsi"
+
+&pm8941_lsid1 {
+	qcom,leds@d000 {
+	  compatible = "qcom,leds-qpnp-shenqi-k9";
+		qcom,rgb_0 {
+			qcom,start-idx=<0>;
+			qcom,duty-pcts=[ 00 0E 1C 2A 38 46 54 64 ];
+			qcom,pause-lo = <500>;
+			qcom,pause-hi = <500>;
+			qcom,ramp-step-ms = <50>;
+			qcom,lut-flags = <31>; /*  loop, ramp up, reverse, pause hi, pause lo */
+			qcom,use-blink;
+			linux,default-trigger = "none";
+			qcom,use-blink;
+		};
+
+		qcom,rgb_1 {
+			qcom,start-idx=<8>;
+			qcom,duty-pcts=[ 00 0E 1C 2A 38 46 54 64 ];
+			qcom,pause-lo = <500>;
+			qcom,pause-hi = <500>;
+			qcom,ramp-step-ms = <50>;
+			qcom,lut-flags = <31>; /*  loop, ramp up, reverse, pause hi, pause lo */
+			qcom,use-blink;
+			linux,default-trigger = "none";
+			qcom,use-blink;
+		};
+
+		qcom,rgb_2 {
+			qcom,start-idx=<16>;
+			qcom,duty-pcts=[ 00 0E 1C 2A 38 46 54 64 ];
+			qcom,pause-lo = <500>;
+			qcom,pause-hi = <500>;
+			qcom,ramp-step-ms = <50>;
+			qcom,lut-flags = <31>; /*  loop, ramp up, reverse, pause hi, pause lo */
+			qcom,use-blink;
+			linux,default-trigger = "none";
+			qcom,use-blink;
+		};
+	};
+
+	qcom,leds@d300 {
+	  compatible = "qcom,leds-qpnp-shenqi-k9";
+
+		/delete-node/ qcom,flash_torch;
+
+		pm8941_torch0: qcom,flash_torch_0 {
+			qcom,max-current = <200>;
+			qcom,default-state = "off";
+			qcom,headroom = <0>;
+			qcom,startup-dly = <1>;
+			linux,default-trigger =
+				"torch0_trigger";
+			label = "flash";
+			qcom,id = <1>;
+			linux,name = "led:torch_0";
+			qcom,current = <85>;
+			qcom,torch-enable;
+		};
+
+		pm8941_torch1: qcom,flash_torch_1 {
+			qcom,max-current = <200>;
+			qcom,default-state = "off";
+			qcom,headroom = <0>;
+			qcom,startup-dly = <1>;
+			linux,default-trigger =
+				"torch1_trigger";
+			label = "flash";
+			qcom,id = <2>;
+			linux,name = "led:torch_1";
+			qcom,current = <85>;
+			qcom,torch-enable;
+		};
+	};
+
+	/delete-node/ qcom,leds@d900;
+	qcom,leds@d900 {
+		status = "disabled";
+	};
+
+	/delete-node/ qcom,leds@da00;
+	qcom,leds@da00 {
+		status = "disabled";
+	};
+
+	/delete-node/ qcom,leds@db00;
+	qcom,leds@db00 {
+		status = "disabled";
+	};
+
+	/delete-node/ qcom,leds@dc00;
+	qcom,leds@dc00 {
+		status = "disabled";
+	};
+
+	/delete-node/ qcom,leds@dd00;
+	qcom,leds@dd00 {
+		status = "disabled";
+	};
+
+	/delete-node/ qcom,leds@de00;
+	qcom,leds@de00 {
+		status = "disabled";
+	};
+
+	/delete-node/ qcom,leds@df00;
+	qcom,leds@df00 {
+		status = "disabled";
+	};
+
+	/delete-node/ qcom,leds@e000;
+	qcom,leds@e000 {
+		status = "disabled";
+	};
+
+	/delete-node/ qcom,leds@e100;
+	qcom,leds@e100 {
+		status = "disabled";
+	};
+
+	qcom,vib@c000{
+		status = "okay";
+		compatible = "qcom,qpnp-vibrator";
+		reg = <0xc000 0x100>;
+		label = "vibrator";
+		qcom,vib-timeout-ms = <15000>;
+		qcom,vib-vtg-level-mV = <3100>;
+	};
+
+	qcom,leds@e200 {
+		compatible = "qcom,leds-qpnp-shenqi-k9";
+
+		qcom,kpdbl1 {
+			linux,name = "button-backlight";
+			/delete-property/ qcom,start-idx;
+			/delete-property/ qcom,ramp-step-ms;
+			/delete-property/ qcom,duty-pcts;
+			/delete-property/ qcom,use-blink;
+			/delete-property/ qcom,in-order-command-processing;
+		};
+
+		qcom,kpdbl2 {
+			linux,name = "button-backlight2";
+			/delete-property/ qcom,start-idx;
+			/delete-property/ qcom,duty-pcts;
+			/delete-property/ qcom,start-idx;
+			/delete-property/ qcom,ramp-step-ms;
+			/delete-property/ qcom,duty-pcts;
+			/delete-property/ qcom,use-blink;
+			/delete-property/ qcom,in-order-command-processing;
+		};
+	};
+};
