@@ -738,11 +738,8 @@ qpnp_chg_is_batt_present(struct qpnp_chg_chip *chip)
 				INT_RT_STS(chip->bat_if_base), rc);
 		return rc;
 	}
-#ifdef CONFIG_BATTERY_BQ27530
-	return 1;
-#else
+
 	return (batt_pres_rt_sts & BATT_PRES_IRQ) ? 1 : 0;
-#endif
 }
 
 static int
