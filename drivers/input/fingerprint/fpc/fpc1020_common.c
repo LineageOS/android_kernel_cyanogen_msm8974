@@ -447,8 +447,7 @@ int fpc1020_check_hw_id(fpc1020_data_t *fpc1020)
 
 		fpc1020->chip.type = FPC1020_CHIP_NONE;
 		fpc1020->chip.revision = 0;
-
-		//return -EIO;
+		return -EIO;
 	}
 
 	return error;

@@ -3442,30 +3442,11 @@ static int wcd9xxx_determine_button(const struct wcd9xxx_mbhc *mbhc,
 static int wcd9xxx_get_button_mask(const int btn)
 {
 	int mask = 0;
-#ifdef CONFIG_MACH_SHENQI_K9
-	switch (btn) {
-	case 0:
-	case 1:
-		mask = SND_JACK_BTN_0;
-		break;
-	case 2:
-		mask = SND_JACK_BTN_5;
-		break;
-	case 3:
-		mask = SND_JACK_BTN_0;
-		break;
-	case 4:
-		mask = SND_JACK_BTN_4;
-		break;
-	case 5:
-	case 6:
-		mask = SND_JACK_BTN_5;
-		break;
-	case 7:
-		mask = SND_JACK_BTN_7;
-		break;
-	}
-#else
+	
+	// This function used to be used for filtering bad button presses.
+	// After fixing the voltage tables though this is no longer required.
+	// I leave the function in place though, just in case we ever have the need to do so later.
+	
 	switch (btn) {
 	case 0:
 		mask = SND_JACK_BTN_0;
@@ -3492,7 +3473,7 @@ static int wcd9xxx_get_button_mask(const int btn)
 		mask = SND_JACK_BTN_7;
 		break;
 	}
-#endif
+	
 	return mask;
 }
 

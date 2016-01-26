@@ -432,8 +432,15 @@ struct input_keymap_entry {
 #define KEY_SEARCH		217
 #define KEY_CONNECT		218
 #define KEY_FINANCE		219	/* AL Checkbook/Finance */
+#if 0  // TODO
 #define KEY_SPORT		220
 #define KEY_SHOP		221
+#else
+#define KEY_SPORT              250
+#define KEY_SHOP               251
+#define KEY_SPORT_B            252
+#define KEY_SHOP_B             253
+#endif
 #define KEY_ALTERASE		222
 #define KEY_CANCEL		223	/* AC Cancel */
 #define KEY_BRIGHTNESSDOWN	224
@@ -474,6 +481,7 @@ struct input_keymap_entry {
 #define KEY_NAVI_RIGHT  249
 #define KEY_NAVI_LEFT   254
 #define KEY_FNGR_DETECT 0x2e8
+#define KEY_NAVI_LONG   183
 
 /* Code 255 is reserved for special needs of AT keyboard driver */
 
@@ -822,6 +830,9 @@ struct input_keymap_entry {
 #define ABS_TOOL_WIDTH		0x1c
 
 #define ABS_VOLUME		0x20
+#define ABS_R                   0x21
+#define ABS_G                   0x22
+#define ABS_B                   0x23
 
 #define ABS_MISC		0x28
 
