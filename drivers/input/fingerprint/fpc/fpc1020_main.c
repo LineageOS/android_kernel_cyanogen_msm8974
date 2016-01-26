@@ -64,13 +64,18 @@ struct fpc1020_attribute {
 struct fpc1020_attribute fpc1020_attr_##_field =			\
 					FPC1020_ATTR(_grp, _field, (_mode))
 
+
+static FPC1020_DEV_ATTR(setup, hw_reset, DEVFS_SETUP_MODE);
 static FPC1020_DEV_ATTR(setup, enable_navi, DEVFS_SETUP_MODE);
 static FPC1020_DEV_ATTR(setup, irq, DEVFS_SETUP_MODE);
+static FPC1020_DEV_ATTR(setup, key, DEVFS_SETUP_MODE);
 static FPC1020_DEV_ATTR(setup, wakeup, DEVFS_SETUP_MODE);
 
 static struct attribute *fpc1020_setup_attrs[] = {
     &fpc1020_attr_enable_navi.attr.attr,
+    &fpc1020_attr_hw_reset.attr.attr,
     &fpc1020_attr_irq.attr.attr,
+    &fpc1020_attr_key.attr.attr,
     &fpc1020_attr_wakeup.attr.attr,
 	NULL
 };
@@ -100,11 +105,15 @@ static ssize_t fpc1020_show_attr_setup(struct device *dev,
 	fpc1020_data_t *fpc1020 = dev_get_drvdata(dev);
 	fpc_attr = container_of(attr, struct fpc1020_attribute, attr);
     if (fpc_attr->offset == offsetof(fpc1020_setup_t, enable_navi))
+        val = 1;
+    if (fpc_attr->offset == offsetof(fpc1020_setup_t, hw_reset))
         val = spi_clk_access_cnt;
     if (fpc_attr->offset == offsetof(fpc1020_setup_t, wakeup))
         val = fpc1020->wakeup_status;
     if (fpc_attr->offset == offsetof(fpc1020_setup_t, irq))
         val = fpc1020->irq_status;
+    if (fpc_attr->offset == offsetof(fpc1020_setup_t, key))
+        val = fpc1020->report_key;
     if (val >= 0)
         return scnprintf(buf, PAGE_SIZE, "%i\n", val);
 	return -ENOENT;
@@ -132,15 +141,27 @@ static ssize_t fpc1020_store_attr_setup(struct device *dev, struct device_attrib
                     clk_disable_unprepare(fpc1020->iface_clk);
                 }
             }
+        } else if (fpc_attr->offset == offsetof(fpc1020_setup_t, hw_reset)) {
+            if (val == 1)
+                fpc1020_hw_reset(fpc1020);
         } else if (fpc_attr->offset == offsetof(fpc1020_setup_t, irq)) {
             if (val == 0 && fpc1020->irq_status == 1) {
-                dev_info(&fpc1020->spi->dev, "IRQ disable\n");
+                //dev_info(&fpc1020->spi->dev, "IRQ disable\n");
                 disable_irq(fpc1020->irq);
                 fpc1020->irq_status = 0;
             } else if (val == 1 && fpc1020->irq_status == 0) {
-                dev_info(&fpc1020->spi->dev, "IRQ enable\n");
+                //dev_info(&fpc1020->spi->dev, "IRQ enable\n");
                 enable_irq(fpc1020->irq);
                 fpc1020->irq_status = 1;
+            }
+        } else if (fpc_attr->offset == offsetof(fpc1020_setup_t, key)) {
+            if (val == KEY_HOME) {
+                //Swallow capacitive hold event to prevent physical hold from breaking
+                dev_info(&fpc1020->spi->dev, "---Swallow--- %d\n", (int)val);
+            } else {
+                dev_info(&fpc1020->spi->dev, "---Report--- %d\n", (int)val);
+                fpc1020->report_key = (int)val;
+                queue_work(fpc1020->fpc1020_wq, &fpc1020->input_report_work);
             }
         } else if (fpc_attr->offset == offsetof(fpc1020_setup_t, wakeup)) {
             dev_info(&fpc1020->spi->dev, "Modify wakeup status(%d)\n", (int)val);
@@ -254,6 +275,9 @@ static int fpc1020_manage_sysfs(fpc1020_data_t *fpc1020,
                     "sysf_create_group failed.\n");
             return error;
         }
+    } else {
+        sysfs_remove_group(&spi->dev.kobj, &fpc1020_setup_attr_group);
+        dev_err(&fpc1020->spi->dev, "fpc1020 sysfs group release\n");
     }
     return error;
 }
@@ -425,8 +449,15 @@ int __devinit fpc1020_input_init(fpc1020_data_t *fpc1020)
     if (!error) {
         fpc1020->input_dev->name = FPC1020_TOUCH_PAD_DEV_NAME;
 		set_bit(EV_KEY, fpc1020->input_dev->evbit);
-		set_bit(FNGR_DETECT, fpc1020->input_dev->keybit);
-		input_set_capability(fpc1020->input_dev, EV_KEY, FNGR_DETECT);
+		set_bit(KEY_BACK, fpc1020->input_dev->keybit);
+		set_bit(KEY_LEFT, fpc1020->input_dev->keybit);
+		set_bit(KEY_RIGHT, fpc1020->input_dev->keybit);
+        set_bit(KEY_NAVI_LONG, fpc1020->input_dev->keybit);
+        input_set_capability(fpc1020->input_dev, EV_KEY, KEY_NAVI_LEFT);
+        input_set_capability(fpc1020->input_dev, EV_KEY, KEY_NAVI_RIGHT);
+        input_set_capability(fpc1020->input_dev, EV_KEY, KEY_BACK);
+        input_set_capability(fpc1020->input_dev, EV_KEY, KEY_NAVI_LONG);
+
 		/* Register the input device */
 		error = input_register_device(fpc1020->input_dev);
 		if (error) {
@@ -438,7 +469,7 @@ int __devinit fpc1020_input_init(fpc1020_data_t *fpc1020)
     return error;
 }
 
-void __devexit fpc1020_input_destroy(fpc1020_data_t *fpc1020)
+void fpc1020_input_destroy(fpc1020_data_t *fpc1020)
 {
 	dev_dbg(&fpc1020->spi->dev, "%s\n", __func__);
 
@@ -501,12 +532,13 @@ void fpc1020_report_work_func(struct work_struct *work)
     fpc1020_data_t *fpc1020 = NULL;
     fpc1020 = container_of(work, fpc1020_data_t, input_report_work);
     if (fpc1020->report_key_flag == true) {
-        dev_warn(&fpc1020->spi->dev, "FNGR_DETECT\n");
-        //wake_up_interruptible(&fnger_detect_wq);
+        dev_info(&fpc1020->spi->dev, "report to input device: %d\n", fpc1020->report_key);
         input_report_key(fpc1020->input_dev, fpc1020->report_key, 1);
         input_sync(fpc1020->input_dev);
+        mdelay(30);
         input_report_key(fpc1020->input_dev, fpc1020->report_key, 0);
         input_sync(fpc1020->input_dev);
+        fpc1020->report_key = 0;
     }
 }
 
@@ -644,72 +676,63 @@ static int __devinit fpc1020_probe(struct spi_device *spi)
     if (!fpc1020_pdata) {
         error = fpc1020_get_of_pdata(dev, &pdata_of);
 		fpc1020_pdata = &pdata_of;
-        if (error)
-            goto err;
+        if (error) {
+            kfree(fpc1020);
+            return -ENOENT;
+        }
     }
 
 	if (!fpc1020_pdata) {
 		dev_err(&fpc1020->spi->dev,
 				"spi->dev.platform_data is NULL.\n");
 		error = -EINVAL;
-		goto err;
+        kfree(fpc1020);
+        return error;
 	}
 
     dev_info(&fpc1020->spi->dev, "InputDevice allocating....\n");
     error = fpc1020_input_init(fpc1020);
-    if (error)
-        goto err;
+    if (error) {
+        kfree(fpc1020);
+        return -ENOENT;
+    }
 
     fpc1020->fpc1020_wq = create_workqueue("fpc1020_wq");
     if (!fpc1020->fpc1020_wq) {
         dev_err(&fpc1020->spi->dev, "Create input workqueue failed\n");
         error = -ENOMEM;
-        goto err;
+        goto wq_err;
     }
     INIT_WORK(&fpc1020->input_report_work, fpc1020_report_work_func);
 
-    error = fpc1020_manage_sysfs(fpc1020, spi, true);
-    if (error)
-        goto err;
+    fpc1020_manage_sysfs(fpc1020, spi, true);
     error = fpc1020_clk_init(fpc1020);
-    if (error)
-        goto err;
+    if (error) 
+        goto clk_err;
 
     error = fpc1020_reset_init(fpc1020, fpc1020_pdata);
     if (error)
-        goto err;
+        goto rst_pin_err;
+
     error = fpc1020_irq_init(fpc1020, fpc1020_pdata);
     if (error)
-        goto err;
+        goto irq_err;
+
     error = fpc1020_spi_setup(fpc1020, fpc1020_pdata);
 	if (error)
-		goto err;
-    error = fpc1020_gpio_reset(fpc1020);
-    if (error)
         goto err;
+
+    fpc1020_gpio_reset(fpc1020);
 
     error = fpc1020_check_hw_id(fpc1020);
     if (error)
         goto err;
 
-    error = fpc1020_setup_defaults(fpc1020);
-    if (error)
-        goto err;
-
-    error = fpc1020_write_sensor_1150_setup(fpc1020);
-    if (error) {
-        dev_err(&fpc1020->spi->dev, "write sensor 1150 setup failed\n");
-        goto err;
-    } else {
-        dev_err(&fpc1020->spi->dev, "Write sensor success\n");
-    }
     error = fpc1020_create_class(fpc1020);
     if (error)
         goto err;
 
-    error = fpc1020_create_device(fpc1020);
-    if (error)
-        goto err;
+    fpc1020_create_device(fpc1020);
 
     /*Init cdev*/
     cdev_init(&fpc1020->cdev, &fpc1020_fops);
@@ -719,7 +742,6 @@ static int __devinit fpc1020_probe(struct spi_device *spi)
         dev_err(&fpc1020->spi->dev, "cdev_add failed.\n");
         cdev_del(&fpc1020->cdev);
         unregister_chrdev_region(fpc1020->devno, 1);
-        fpc1020_manage_sysfs(fpc1020, spi, false);
         goto err;
     }
     fpc1020->fb_notif.notifier_call = fb_notifier_callback;
@@ -737,9 +759,26 @@ static int __devinit fpc1020_probe(struct spi_device *spi)
     return 0;
 
 err:
-    fpc1020_cleanup(fpc1020, spi);
-    return error;
+    if (fpc1020->class != NULL)
+        class_destroy(fpc1020->class);
+    wake_lock_destroy(&fpc1020->wake_lock);
+irq_err:
+    if (fpc1020->irq >= 0)
+        free_irq(fpc1020->irq, fpc1020);
+    if (gpio_is_valid(fpc1020->irq_gpio))
+        gpio_free(fpc1020->irq_gpio);
+rst_pin_err:
+	if (gpio_is_valid(fpc1020->reset_gpio))
+		gpio_free(fpc1020->reset_gpio);
+    fpc1020->reset_gpio = -EINVAL;
+clk_err:
+    fpc1020_manage_sysfs(fpc1020, spi, false);
+wq_err:
+	if (fpc1020->input_dev != NULL)
+		input_free_device(fpc1020->input_dev);
+    kfree(fpc1020);
 
+    return error;
 }
 
 static int __devexit fpc1020_remove(struct spi_device *spi)
