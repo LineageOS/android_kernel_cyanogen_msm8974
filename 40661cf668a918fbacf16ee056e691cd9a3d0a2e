@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5faad753_6f615d05",
+        "filename": "drivers/video/msm/mdss/mdss_livedisplay.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 7880
+      },
+      "writtenOn": "2016-06-02T10:55:10Z",
+      "side": 1,
+      "message": "I also added in this check for whether the panel is powered off. This was supposed to be in the initial LiveDisplay patchset, but it was missed out.",
+      "revId": "40661cf668a918fbacf16ee056e691cd9a3d0a2e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
