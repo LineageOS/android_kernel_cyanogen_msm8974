@@ -16,6 +16,24 @@
       "revId": "40661cf668a918fbacf16ee056e691cd9a3d0a2e",
       "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5faad753_1ef7bc61",
+        "filename": "drivers/video/msm/mdss/mdss_livedisplay.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 190,
+      "author": {
+        "id": 68
+      },
+      "writtenOn": "2016-06-03T07:38:34Z",
+      "side": 1,
+      "message": "mlc-\u003emfd, otherwise it looks good.",
+      "parentUuid": "5faad753_6f615d05",
+      "revId": "40661cf668a918fbacf16ee056e691cd9a3d0a2e",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
     }
   ]
 }
