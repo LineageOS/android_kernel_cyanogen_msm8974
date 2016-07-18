@@ -3338,7 +3338,16 @@ int ext4_can_truncate(struct inode *inode)
 
 int ext4_punch_hole(struct file *file, loff_t offset, loff_t length)
 {
+#if 0
 	struct inode *inode = file->f_path.dentry->d_inode;
+	struct super_block *sb = inode->i_sb;
+	ext4_lblk_t first_block, stop_block;
+	struct address_space *mapping = inode->i_mapping;
+	loff_t first_block_offset, last_block_offset;
+	handle_t *handle;
+	unsigned int credits;
+	int ret = 0;
+
 	if (!S_ISREG(inode->i_mode))
 		return -EOPNOTSUPP;
 
@@ -3353,6 +3362,38 @@ int ext4_punch_hole(struct file *file, loff_t offset, loff_t length)
 	}
 
 	return ext4_ext_punch_hole(file, offset, length);
+#else
+	/*
+	 * Disabled as per b/28760453
+	 */
+	return -EOPNOTSUPP;
+#endif
+}
+
+int ext4_inode_attach_jinode(struct inode *inode)
+{
+	struct ext4_inode_info *ei = EXT4_I(inode);
+	struct jbd2_inode *jinode;
+
+	if (ei->jinode || !EXT4_SB(inode->i_sb)->s_journal)
+		return 0;
+
+	jinode = jbd2_alloc_inode(GFP_KERNEL);
+	spin_lock(&inode->i_lock);
+	if (!ei->jinode) {
+		if (!jinode) {
+			spin_unlock(&inode->i_lock);
+			return -ENOMEM;
+		}
+		ei->jinode = jinode;
+		jbd2_journal_init_jbd_inode(ei->jinode, inode);
+		jinode = NULL;
+	}
+	spin_unlock(&inode->i_lock);
+	if (unlikely(jinode != NULL))
+		jbd2_free_inode(jinode);
+	return 0;
+>>>>>>> f9a0b6c... fs: ext4: disable support for fallocate FALLOC_FL_PUNCH_HOLE
 }
 
 /*
