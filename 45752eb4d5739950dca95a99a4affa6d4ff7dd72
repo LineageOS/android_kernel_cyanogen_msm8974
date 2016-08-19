@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1fa4df85_d8344fe1",
+        "filename": "drivers/input/fingerprint/fpc/fpc1020_main.c",
+        "patchSetId": 1
+      },
+      "lineNbr": 159,
+      "author": {
+        "id": 13956
+      },
+      "writtenOn": "2016-08-19T17:41:46Z",
+      "side": 1,
+      "message": "actually fingerprintd hal does not use sys entry wakeup, it is for debug purpose only.",
+      "revId": "45752eb4d5739950dca95a99a4affa6d4ff7dd72",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
