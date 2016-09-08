@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1fa4df85_63c77547",
+        "filename": "fs/ext4/inode.c",
+        "patchSetId": 2
+      },
+      "lineNbr": 3343,
+      "author": {
+        "id": 12592
+      },
+      "writtenOn": "2016-09-08T14:08:19Z",
+      "side": 1,
+      "message": "mismerge?",
+      "revId": "ec6f1fd8f6534917d871d3afb0b49e4e4ad6aba1",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
