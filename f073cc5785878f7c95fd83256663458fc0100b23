@@ -1,0 +1,170 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "da87b5cf_21587831",
+        "filename": "drivers/input/touchscreen/gt9xx-shenqi/gt9xx.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2017-07-08T13:06:47Z",
+      "side": 1,
+      "message": "remove space",
+      "range": {
+        "startLine": 603,
+        "startChar": 19,
+        "endLine": 603,
+        "endChar": 20
+      },
+      "revId": "f073cc5785878f7c95fd83256663458fc0100b23",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_a13488de",
+        "filename": "drivers/input/touchscreen/gt9xx-shenqi/gt9xx.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 603,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2017-07-08T13:06:47Z",
+      "side": 1,
+      "message": "add space",
+      "revId": "f073cc5785878f7c95fd83256663458fc0100b23",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_c12f4c87",
+        "filename": "drivers/input/touchscreen/gt9xx-shenqi/gt9xx.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 609,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2017-07-08T13:06:47Z",
+      "side": 1,
+      "message": "if (i) {\n        report_key \u003d gtp_key_reverse ? KEY_MENU : KEY_BACK;\n    } else {\n        report_key \u003d gtp_key_reverse ? KEY_BACK : KEY_MENU;\n    }",
+      "range": {
+        "startLine": 605,
+        "startChar": 0,
+        "endLine": 609,
+        "endChar": 5
+      },
+      "revId": "f073cc5785878f7c95fd83256663458fc0100b23",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_614e8071",
+        "filename": "drivers/input/touchscreen/gt9xx-shenqi/gt9xx.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 610,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2017-07-08T13:06:47Z",
+      "side": 1,
+      "message": "remove space",
+      "range": {
+        "startLine": 610,
+        "startChar": 46,
+        "endLine": 610,
+        "endChar": 47
+      },
+      "revId": "f073cc5785878f7c95fd83256663458fc0100b23",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_81514410",
+        "filename": "drivers/input/touchscreen/gt9xx-shenqi/gt9xx.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 612,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2017-07-08T13:06:47Z",
+      "side": 1,
+      "message": "remove space and add after ,",
+      "range": {
+        "startLine": 612,
+        "startChar": 52,
+        "endLine": 612,
+        "endChar": 53
+      },
+      "revId": "f073cc5785878f7c95fd83256663458fc0100b23",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_e141303a",
+        "filename": "drivers/input/touchscreen/gt9xx-shenqi/gt9xx.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 956,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2017-07-08T13:06:47Z",
+      "side": 1,
+      "message": "if (!pre_touch \u0026\u0026 gtp_key_enable) {",
+      "range": {
+        "startLine": 955,
+        "startChar": 0,
+        "endLine": 956,
+        "endChar": 31
+      },
+      "revId": "f073cc5785878f7c95fd83256663458fc0100b23",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_415b3c2e",
+        "filename": "drivers/input/touchscreen/gt9xx-shenqi/gt9xx.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 958,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2017-07-08T13:06:47Z",
+      "side": 1,
+      "message": "add space",
+      "revId": "f073cc5785878f7c95fd83256663458fc0100b23",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "da87b5cf_013d34bb",
+        "filename": "drivers/input/touchscreen/gt9xx-shenqi/gt9xx.c",
+        "patchSetId": 6
+      },
+      "lineNbr": 3096,
+      "author": {
+        "id": 11883
+      },
+      "writtenOn": "2017-07-08T13:06:47Z",
+      "side": 1,
+      "message": "add space",
+      "revId": "f073cc5785878f7c95fd83256663458fc0100b23",
+      "serverId": "1ec6b3db-b2c1-4fa4-84a2-4c7efe89ba71",
+      "unresolved": false
+    }
+  ]
+}
