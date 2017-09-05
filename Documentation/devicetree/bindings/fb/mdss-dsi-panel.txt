@@ -294,9 +294,6 @@ Optional properties:
 - qcom,mdss-tear-check-frame-rate:	Specify the value to be a real frame rate(fps) x 100 factor to tune the
 					timing of TE simulation with more precision.
 					The default value is 6000 with 60 fps.
-- qcom,panel-roi-alignment:		Specifies the panel ROI alignment restrictions on its
-					left, top, width, height alignments and minimum width and
-					height values
 - qcom,dynamic-mode-switch-enabled:		Boolean used to mention whether panel supports
 					dynamic switching from video mode to command mode
 					and vice versa.
@@ -435,7 +432,6 @@ Example:
 		qcom,mdss-tear-check-start-pos = <1280>;
 		qcom,mdss-tear-check-rd-ptr-trigger-intr = <1281>;
 		qcom,mdss-tear-check-frame-rate = <6000>;
-		qcom,panel-roi-alignment = <4 4 2 2 20 20>;
 		qcom,dynamic-mode-switch-enabled;
 		qcom,video-to-cmd-mode-switch-commands = [15 01 00 00 00 00 02 C2 0B
 						15 01 00 00 00 00 02 C2 08];
