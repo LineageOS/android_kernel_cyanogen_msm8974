@@ -13,6 +13,8 @@
 
 &pm8941_lsid1 {
 	qcom,leds@d000 {
+                qcom,rgb-sync;
+
 		status = "okay";
 		qcom,rgb_0 {
 			label = "rgb";
