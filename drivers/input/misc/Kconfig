@@ -732,4 +732,12 @@ config SENSORS_ISL29124
 
 	  To compile this driver as a module, choose M here: the
 	  module will be called ISL29124.
+	
+config SENSORS_LENOVO_HALL_SWITCH
+	tristate "Hall switch sensor"
+	depends on I2C
+	default n
+	help
+	  Say Y here to enable the Hall switch sensor.
+
 endif
