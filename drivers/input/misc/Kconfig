@@ -723,4 +723,13 @@ config SENSORS_CAPELLA_CM36283
 	  To compile this driver as a module, choose M here: the
 	  module will be called CM36283.
 
+config SENSORS_ISL29124
+	tristate "ISL29124 light sensor"
+	depends on I2C
+	default n
+	help
+	  Say Y here to enable the ISL29124 Ambient Light Sensor.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called ISL29124.
 endif
