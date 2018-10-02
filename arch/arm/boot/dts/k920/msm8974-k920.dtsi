@@ -1,0 +1,451 @@
+/* Copyright (c) 2012-2014, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+/include/ "msm8974-k920-camera.dtsi"
+/include/ "msm8974-k920-camera-sensor.dtsi"
+/include/ "msm8974-k920-leds.dtsi"
+/include/ "msm8974-k920-mdss.dtsi"
+/include/ "msm8974-k920-mdss-panels.dtsi"
+/include/ "msm8974-k920-pm8941.dtsi"
+/include/ "msm8974-k920-regulator.dtsi"
+
+/ {
+	aliases {
+		serial0 = &blsp1_uart1;
+	};
+};
+
+&pm8941_lsid0 {
+	qcom,power-on@800 {
+		interrupts = <0x0 0x8 0x0>,
+			     <0x0 0x8 0x1>,
+			     <0x0 0x8 0x3>,
+			     <0x0 0x8 0x4>,
+			     <0x0 0x8 0x5>;
+		interrupt-names = "kpdpwr", "resin", "kpdpwr-bark",
+			"resin-bark", "kpdpwr-resin-bark";
+
+		qcom,pon_1 {
+			qcom,s1-timer = <6720>;
+			qcom,s2-type = <7>;
+			qcom,use-bark;
+		};
+
+		qcom,pon_2 {
+			/delete-property/ qcom,support-reset;
+		};
+
+		qcom,pon_3 {
+			/delete-property/ qcom,support-reset;
+		};
+	};
+
+	qcom,pm8941_rtc {
+		qcom,qpnp-rtc-alarm-pwrup = <1>;
+	};
+};
+
+&pm8941_lsid1 {
+	/* qpnp-vibrator */
+	qcom,vib@c000{
+		status = "okay";
+		compatible = "qcom,qpnp-vibrator";
+		reg = <0xc000 0x100>;
+		label = "vibrator";
+		qcom,vib-timeout-ms = <15000>;
+		qcom,vib-vtg-level-mV = <2850>;
+		qcom,vib-vtg-max-mV = <3100>;
+		qcom,vib-vtg-min-mV = <1200>;
+	};
+};
+
+&soc {
+	serial@f991e000 {
+		status = "ok";
+	};
+
+	i2c@f9924000 {
+		cell-index = <2>;
+		compatible = "qcom,i2c-qup";
+		reg = <0xf9924000 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "qup_phys_addr";
+		interrupts = <0 96 0>;
+		interrupt-names = "qup_err_intr";
+		qcom,i2c-bus-freq = <384000>;
+		qcom,i2c-src-freq = <19200000>;
+		qcom,master-id = <86>;
+		qcom,scl-gpio = <&msmgpio 7 0>;
+		qcom,sda-gpio = <&msmgpio 6 0>;
+
+		/* synaptics s3408 touchscreen */
+		synaptics_s3408@38 {
+			compatible = "synaptics,s3408";
+			reg = <0x38>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <82 0x2>;
+			vdd-supply = <&pm8941_l18>;
+			vdd1-supply = <&pm8941_l23>;
+			vcc_i2c-supply = <&pm8941_l12>;
+			synaptics,reset-gpio = <&msmgpio 94 0x00>;
+			synaptics,irq-gpio = <&msmgpio 82 0x00>;
+			synaptics,button-map = <139 172 158>;
+			synaptics,i2c-pull-up;
+			synaptics,power-down;
+		};
+
+		/* isl29124_f RGB light sensor */
+		isl29124_f@44 {
+			compatible = "isl29124_f";
+			reg = <0x44>;
+			vdd-supply = <&pm8941_l18>;
+			vcc_i2c-supply = <&pm8941_lvs1>;
+		};
+	};
+
+	i2c@f9967000 {
+		cell-index = <0>;
+		compatible = "qcom,i2c-qup";
+		reg = <0Xf9967000 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "qup_phys_addr";
+		interrupts = <0 105 0>;
+		interrupt-names = "qup_err_intr";
+		qcom,i2c-bus-freq = <100000>;
+		qcom,i2c-src-freq = <19200000>;
+		qcom,master-id = <84>;
+
+		/* bq27530 battery */
+		bq27530@55 {
+			reg = <0x55>;
+			compatible = "ti,bq27530-battery";
+			interrupt-parent = <&msmgpio>;
+			vcc_i2c-supply = <&pm8941_s3>;
+			bq27530,chg-int-gpio = <&msmgpio 144 0x00>;
+			bq27530,fg-int-gpio = <&msmgpio 86 0x00>;
+			bq27530,usb-sw-gpio = <&msmgpio 78 0x00>;
+			bq27530,chg-en-gpio = <&pm8941_gpios 10 0x00>;
+			bq27530,chg-otg-gpio = <&pm8941_gpios 11 0x00>;
+			bq27530,chg-psel-gpio = <&pm8941_gpios 12 0x00>;
+			bq27530,usb-sw-en-gpio = <&pm8941_gpios 14 0x00>;
+		};
+	};
+
+	i2c@f9928000 {
+		cell-index = <3>;
+		compatible = "qcom,i2c-qup";
+		reg = <0xf9928000 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "qup_phys_addr";
+		interrupts = <0 100 0>;
+		interrupt-names = "qup_err_intr";
+		qcom,i2c-bus-freq = <400000>;
+		qcom,i2c-src-freq = <19200000>;
+		qcom,scl-gpio = <&msmgpio 30 0>;
+		qcom,sda-gpio = <&msmgpio 29 0>;
+		qcom,master-id = <86>;
+
+		/* nxp pn547 nfc */
+		pn547@28 {
+			compatible = "nxp,nfc-547";
+			reg = <0x28>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <95 0x2>;
+			nxp-nfc-547,irq-gpio = <&msmgpio 95 0x00>;
+			nxp-nfc-547,firm-gpio = <&msmgpio 81 0x00>;
+			nxp-nfc-547,ven-gpio = <&msmgpio 102 0x00>;
+			qcom,clk-src = "BBCLK2";
+			qcom,clk-gpio = <&pm8941_gpios 35 0>;
+		};
+	};
+
+	i2c@f9927000 {
+		cell-index = <5>;
+		compatible = "qcom,i2c-qup";
+		reg = <0xf9927000 0x1000>;
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "qup_phys_addr";
+		interrupts = <0 99 0>;
+		interrupt-names = "qup_err_intr";
+		qcom,i2c-bus-freq = <100000>;
+		qcom,i2c-src-freq = <19200000>;
+		qcom,scl-gpio = <&msmgpio 26 0>;
+		qcom,sda-gpio = <&msmgpio 25 0>;
+
+		/* tfa9890 audio */
+		tfa9890@34 {
+			compatible = "nxp,tfa9890";
+			reg = <0x34>;
+			interrupt-parent = <&msmgpio>;
+			interrupts = <27 0x2>;
+			irq-gpio = <&msmgpio 27 0x00>;
+			reset-gpio = <&msmgpio 23 0x00>;
+			vdd-supply = <&pm8941_s3>;
+			vcc_i2c-supply = <&pm8941_lvs1>;
+			tfa9890,i2c-pull-up;
+			tfa9890,power-down;
+		};
+	};
+
+	gpio_keys {
+		compatible = "gpio-keys";
+		input-name = "gpio-keys";
+
+		vol_down {
+			label = "volume_down";
+			gpios = <&pm8941_gpios 2 0x1>;
+			linux,input-type = <1>;
+			linux,code = <114>;
+			gpio-key,wakeup;
+			debounce-interval = <15>;
+		};
+
+		vol_up {
+			label = "volume_up";
+			gpios = <&pm8941_gpios 5 0x1>;
+			linux,input-type = <1>;
+			linux,code = <115>;
+			gpio-key,wakeup;
+			debounce-interval = <15>;
+		};
+	};
+
+	hall_switch {
+		compatible = "hall-switch";
+		interrupt-parent = <&msmgpio>;
+		interrupts = <80 0>;
+		irq-gpio = <&msmgpio 80 0x0>;
+	};
+
+	/* NFC_eSE_SPI */
+	spi@f9923000 {
+		compatible = "qcom,spi-qup-v2";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "spi_physical", "spi_bam_physical";
+		reg = <0xf9923000 0x1000>,
+		      <0xf9904000 0x19000>;
+		interrupt-names = "spi_irq", "spi_bam_irq";
+		interrupts = <0 95 0>, <0 238 0>;
+		spi-max-frequency = <19200000>;
+
+		qcom,gpio-mosi = <&msmgpio 0 0>;
+		qcom,gpio-miso = <&msmgpio 1 0>;
+		qcom,gpio-clk  = <&msmgpio 3 0>;
+		qcom,gpio-cs0  = <&msmgpio 2 0>;
+
+		qcom,infinite-mode = <0>;
+		qcom,use-bam;
+		qcom,ver-reg-exists;
+		qcom,bam-consumer-pipe-index = <12>;
+		qcom,bam-producer-pipe-index = <13>;
+		qcom,master-id = <86>;
+	};
+
+	sound {
+		qcom,model = "msm8974-taiko-mtp-snd-card";
+		qcom,us-euro-gpios = <&pm8941_gpios 20 0>;
+		qcom,cdc-micbias2-headset-only;
+		qcom,mbhc-audio-jack-type = "4-pole-jack";
+
+		/* tfa9890 mi2s */
+		qcom,quat-mi2s-gpio-mclk  = <&msmgpio 57 0>;
+		qcom,quat-mi2s-gpio-sck   = <&msmgpio 58 0>;
+		qcom,quat-mi2s-gpio-ws    = <&msmgpio 59 0>;
+		qcom,quat-mi2s-gpio-data0 = <&msmgpio 60 0>;
+		qcom,quat-mi2s-gpio-data1 = <&msmgpio 61 0>;
+
+		reg = <0xfe02c000 0x4>,
+		      <0xfe02d000 0x4>,
+		      <0xfe02e000 0x4>,
+		      <0xfe02f000 0x4>;
+
+		qcom,audio-routing =
+			"RX_BIAS", "MCLK",
+			"LDO_H", "MCLK",
+			"AIF4 MAD", "MCLK",
+			"DMIC1", "MIC BIAS1 External",
+			"MIC BIAS1 External", "Handset Mic",
+			"AMIC2", "MIC BIAS2 External",
+			"MIC BIAS2 External", "Headset Mic",
+			"DMIC5", "MIC BIAS4 External",
+			"MIC BIAS4 External", "ANC Front Mic",
+			"DMIC3", "MIC BIAS3 External",
+			"MIC BIAS3 External", "DUAL Rear Mic",
+			"DMIC1", "MIC BIAS1 External",
+			"MIC BIAS1 External", "Digital Mic1",
+			"DMIC2", "MIC BIAS1 External",
+			"MIC BIAS1 External", "Digital Mic2",
+			"DMIC3", "MIC BIAS3 External",
+			"MIC BIAS3 External", "Digital Mic3",
+			"DMIC4", "MIC BIAS3 External",
+			"MIC BIAS3 External", "Digital Mic4",
+			"DMIC5", "MIC BIAS4 External",
+			"MIC BIAS4 External", "Digital Mic5",
+			"DMIC6", "MIC BIAS4 External",
+			"MIC BIAS4 External", "Digital Mic6";
+	};
+
+	qcom,msm-dai-mi2s {
+		compatible = "qcom,msm-dai-mi2s";
+		qcom,msm-dai-q6-mi2s-quat {
+			compatible = "qcom,msm-dai-q6-mi2s";
+			qcom,msm-dai-q6-mi2s-dev-id = <3>;
+			qcom,msm-mi2s-rx-lines = <2>;
+			qcom,msm-mi2s-tx-lines = <1>;
+		};
+	};
+
+	hw_ver {
+		reg = <0 0x0>;
+		compatible = "hw-version";
+		qcom,adc0-channel-num = <0x14>; /* VER_ADC0 */
+		qcom,adc1-channel-num = <0x15>; /* VER_ADC1 */
+		qcom,hw_ver-vadc = <&pm8941_vadc>;
+		gpios = <&msmgpio 56 0>, /* VER_GPIO0 */
+			<&msmgpio 92 0>; /* VER_GPIO1 */
+	};
+
+	lenovo_hw {
+		compatible = "lenovo-hw";
+		hw-gpio = <&msmgpio 85 0>;
+	};
+};
+
+&sdcc1 {
+	status = "disabled";
+};
+
+&sdcc2 {
+	#address-cells = <0>;
+	interrupt-parent = <&sdcc2>;
+	interrupts = <0 1 2>;
+	#interrupt-cells = <1>;
+	interrupt-map-mask = <0xffffffff>;
+	interrupt-map = <0 &intc 0 125 0
+			1 &intc 0 220 0
+			2 &msmgpio 62 0x3>;
+	interrupt-names = "core_irq", "bam_irq", "status_irq";
+	cd-gpios = <&msmgpio 62 0x1>;
+	status = "disabled";
+};
+
+&sdhc_1 {
+	vdd-supply = <&pm8941_l20>;
+	vdd-io-supply = <&pm8941_s3>;
+
+	qcom,vdd-always-on;
+	qcom,vdd-lpm-sup;
+	qcom,vdd-voltage-level = <2950000 2950000>;
+	qcom,vdd-current-level = <800 500000>;
+
+	qcom,vdd-io-always-on;
+	qcom,vdd-io-voltage-level = <1800000 1800000>;
+	qcom,vdd-io-current-level = <250 154000>;
+
+	qcom,pad-pull-on = <0x0 0x3 0x3>; /* no-pull, pull-up, pull-up */
+	qcom,pad-pull-off = <0x0 0x3 0x3>; /* no-pull, pull-up, pull-up */
+	qcom,pad-drv-on = <0x4 0x4 0x4>; /* 10mA, 10mA, 10mA */
+	qcom,pad-drv-off = <0x0 0x0 0x0>; /* 2mA, 2mA, 2mA */
+
+	qcom,nonremovable;
+	status = "ok";
+};
+
+&sdhc_2 {
+	#address-cells = <0>;
+	interrupt-parent = <&sdhc_2>;
+	interrupts = <0 1 2>;
+	#interrupt-cells = <1>;
+	interrupt-map-mask = <0xffffffff>;
+	interrupt-map = <0 &intc 0 125 0
+			1 &intc 0 221 0
+			2 &msmgpio 62 0x3>;
+	interrupt-names = "hc_irq", "pwr_irq", "status_irq";
+
+	qcom,nonremovable;
+	/delete-property/ cd-gpios;
+};
+
+/* Drive strength recommendations for clock line from hardware team is 10 mA.
+ * But since the driver has been been using the below values from the start
+ * without any problems, continue to use those.
+ */
+&sdcc1 {
+	qcom,pad-drv-on = <0x7 0x4 0x4>; /* 16mA, 10mA, 10mA */
+};
+
+&sdcc2 {
+	qcom,pad-drv-on = <0x7 0x4 0x4>; /* 16mA, 10mA, 10mA */
+};
+
+&sdhc_1 {
+	qcom,pad-drv-on = <0x7 0x4 0x4>; /* 16mA, 10mA, 10mA */
+};
+
+&sdhc_2 {
+	qcom,pad-drv-on = <0x7 0x4 0x4>; /* 16mA, 10mA, 10mA */
+};
+
+&usb_otg {
+	qcom,hsusb-otg-otg-control = <2>;
+};
+
+&uart7 {
+	status = "ok";
+};
+
+&usb3 {
+	qcom,otg-capability;
+	qcom,prop-chg-detect;
+};
+
+&slim_msm {
+	taiko_codec {
+/*		qcom,cdc-micbias1-ext-cap;*/
+		qcom,cdc-micbias2-ext-cap;
+/*		qcom,cdc-micbias3-ext-cap;*/
+/*		qcom,cdc-micbias4-ext-cap;*/
+
+		cdc-vdd-spkdrv-supply = <&pm8941_boost>;
+		qcom,cdc-vdd-spkdrv-voltage = <5000000 5000000>;
+		qcom,cdc-vdd-spkdrv-current = <1250000>;
+
+		qcom,cdc-on-demand-supplies = "cdc-vdd-spkdrv";
+
+		qcom,cdc-micbias-cfilt1-mv = <2700>;
+		qcom,cdc-dmic-sample-rate = <2400000>;
+	};
+};
+
+&spi_epm {
+	epm-adc@0 {
+		compatible = "cy,epm-adc-cy8c5568lti-114";
+		reg = <0>;
+		interrupt-parent = <&msmgpio>;
+		spi-max-frequency = <960000>;
+		qcom,channels = <31>;
+		qcom,gain = <100 100 100 50 100 100 1 100 1 50
+				1 100 1 100 50 50 50 50 50 50
+				100 50 100 50 50 50 50 50 50 50
+				50>;
+		qcom,rsense = <2 2 2 200 20 2 1 2 1 30
+				1 10 1 30 50 30 500 30 100 30
+				100 500 20 200 1000 20 1000 1000 70 200
+				50>;
+		qcom,channel-type = <0x1540>;
+	};
+};
