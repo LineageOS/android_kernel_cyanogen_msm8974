@@ -335,6 +335,14 @@ struct mdss_panel_info {
 	int new_fps;
 	int panel_max_fps;
 	int panel_max_vtotal;
+#ifdef CONFIG_MACH_LENOVO_K920
+	u32 xstart_pix_align;
+	u32 width_pix_align;
+	u32 ystart_pix_align;
+	u32 height_pix_align;
+	u32 min_width;
+	u32 min_height;
+#endif
 	u32 min_fps;
 	u32 max_fps;
 
