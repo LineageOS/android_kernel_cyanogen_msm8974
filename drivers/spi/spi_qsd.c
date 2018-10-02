@@ -51,7 +51,7 @@
 static int msm_spi_pm_resume_runtime(struct device *device);
 static int msm_spi_pm_suspend_runtime(struct device *device);
 static inline void msm_spi_dma_unmap_buffers(struct msm_spi *dd);
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 struct msm_spi *global_dd = NULL;
 #endif
 
@@ -95,7 +95,7 @@ static inline void msm_spi_register_init(struct msm_spi *dd)
 		writel_relaxed(0x00000000, dd->base + QUP_OPERATIONAL_MASK);
 }
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 void msm_spi_switch_back(void)
 {
 	writel_relaxed(0x00000001, global_dd->base + SPI_SW_RESET);
@@ -3337,7 +3337,7 @@ skip_dma_resources:
 		dev_err(&pdev->dev, "failed to create dev. attrs : %d\n", rc);
 		goto err_attrs;
 	}
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	global_dd = dd;
 #endif
 
