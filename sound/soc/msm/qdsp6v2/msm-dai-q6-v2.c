@@ -101,7 +101,7 @@ static const struct soc_enum mi2s_config_enum[] = {
 	SOC_ENUM_SINGLE_EXT(4, mi2s_format),
 };
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 static int msm_mi2s_get_port_id(u32 mi2s_id, int stream, u16 *port_id);
 extern atomic_t quat_mi2s_clk_ref;
 #endif
@@ -1726,7 +1726,7 @@ static void msm_dai_q6_mi2s_shutdown(struct snd_pcm_substream *substream,
 				__func__, port_id);
 	}
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	if ((atomic_read(&quat_mi2s_clk_ref) >= 1) && (port_id == AFE_PORT_ID_QUATERNARY_MI2S_RX)) {
 		printk("[%s]quat_mi2s_clk_ref is using...port_id=%#x\n", __func__, port_id);
 		if (test_bit(STATUS_PORT_STARTED, dai_data->status_mask))
@@ -1751,7 +1751,7 @@ static void msm_dai_q6_mi2s_shutdown(struct snd_pcm_substream *substream,
 		clear_bit(STATUS_PORT_STARTED, dai_data->hwfree_status);
 }
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 int msm_q6_enable_mi2s_clocks(bool enable)
 {
     union afe_port_config port_config;
