@@ -317,7 +317,7 @@ struct mdss_dsi_ctrl_pdata {
 	struct dsi_buf status_buf;
 	int status_mode;
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	int disp_vsp_gpio;
 	int disp_vsn_gpio;
 	int bl_outdoor_gpio;
