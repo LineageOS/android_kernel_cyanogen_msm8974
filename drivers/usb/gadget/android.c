@@ -3111,7 +3111,7 @@ static void android_resume(struct usb_gadget *gadget)
 	composite_resume(gadget);
 }
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 static ssize_t usb_speed_show(struct device *dev,
                 struct device_attribute *attr, char *buf)
 {
@@ -3150,7 +3150,7 @@ static int android_create_device(struct android_dev *dev, u8 usb_core_id)
 			return err;
 		}
 	}
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
         err = device_create_file(dev->dev, &dev_attr_iSpeed);
 #endif
 	return 0;

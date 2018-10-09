@@ -35,6 +35,9 @@ static void dwc3_otg_notify_host_mode(struct usb_otg *otg, int host_mode);
 static void dwc3_otg_reset(struct dwc3_otg *dotg);
 #ifdef CONFIG_BATTERY_BQ27530
 extern void bq24192_update_chrg_type(int type);
+#ifdef CONFIG_MACH_LENOVO_K920
+extern void otg_func_set(bool enable);
+#endif
 #endif
 
 /**
@@ -248,7 +251,9 @@ static int dwc3_otg_start_host(struct usb_otg *otg, int on)
 			dwc3_otg_notify_host_mode(otg, 0);
 			return ret;
 		}
-
+#ifdef CONFIG_MACH_LENOVO_K920
+		otg_func_set(true);
+#endif
 		/* re-init OTG EVTEN register as XHCI reset clears it */
 		if (ext_xceiv && !ext_xceiv->otg_capability)
 			dwc3_otg_reset(dotg);
@@ -260,6 +265,9 @@ static int dwc3_otg_start_host(struct usb_otg *otg, int on)
 			dev_err(otg->phy->dev, "unable to disable vbus_otg\n");
 			return ret;
 		}
+#ifdef CONFIG_MACH_LENOVO_K920
+		otg_func_set(false);
+#endif
 		dwc3_otg_notify_host_mode(otg, on);
 
 		platform_device_del(dwc->xhci);
