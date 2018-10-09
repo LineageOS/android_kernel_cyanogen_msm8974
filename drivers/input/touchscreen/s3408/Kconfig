@@ -1,0 +1,13 @@
+#
+# Synaptics s3408 DSX I2C touchscreen driver
+#
+
+config TOUCHSCREEN_SYNAPTICS_S3408_FW_UPDATE
+	tristate "Synaptics s3408 DSX I2C touchscreen firmware update"
+	depends on TOUCHSCREEN_SYNAPTICS_S3408
+	default n
+	help
+	  This enables support for firmware update for Synaptics
+	  s3408 DSX I2C touchscreen.
+
+	  If unsure, say N.
