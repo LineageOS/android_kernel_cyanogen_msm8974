@@ -1208,7 +1208,7 @@ int adm_open(int port_id, int path, int rate, int channel_mode, int topology,
 			    (open.topology_id == SRS_TRUMEDIA_TOPOLOGY_ID))
 				open.topology_id = DEFAULT_COPP_TOPOLOGY;
 		}
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 		if (perf_mode == LOW_LATENCY_PCM_MODE &&
 				open.topology_id == DIRAC_HD_AUDIO_TOPOLOGY_ID) {
 			open.topology_id = DEFAULT_COPP_TOPOLOGY;

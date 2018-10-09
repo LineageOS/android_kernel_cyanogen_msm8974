@@ -77,7 +77,7 @@ static int msm_route_ec_ref_rx = 7; /* NONE */
 static uint32_t voc_session_id = ALL_SESSION_VSID;
 static int msm_route_ext_ec_ref = AFE_PORT_INVALID;
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 static int fm_mi2s_switch_enable;
 static uint32_t msm_audio_route_ext_ec_ref = 8 /* NONE */;
 static int audio_ec_ref_port_id = AFE_PORT_INVALID;
@@ -867,7 +867,7 @@ static int msm_routing_put_switch_mixer(struct snd_kcontrol *kcontrol,
 	return 1;
 }
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 static int msm_routing_get_mi2s_switch_mixer(struct snd_kcontrol *kcontrol,
 		struct snd_ctl_elem_value *ucontrol)
 {
@@ -1569,7 +1569,7 @@ static int msm_routing_ext_ec_put(struct snd_kcontrol *kcontrol,
 	struct soc_enum *e = (struct soc_enum *)kcontrol->private_value;
 	int ret = 0;
 	bool state = false;
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	uint16_t ext_ec_ref_port_id;
 #endif
 
@@ -1585,7 +1585,7 @@ static int msm_routing_ext_ec_put(struct snd_kcontrol *kcontrol,
 	mutex_lock(&routing_lock);
 	switch (ucontrol->value.integer.value[0]) {
 	case EC_PORT_ID_PRIMARY_MI2S_TX:
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 		ext_ec_ref_port_id = AFE_PORT_ID_PRIMARY_MI2S_TX;
 		msm_route_ext_ec_ref = 1;
 #else
@@ -1594,7 +1594,7 @@ static int msm_routing_ext_ec_put(struct snd_kcontrol *kcontrol,
 		state = true;
 		break;
 	case EC_PORT_ID_SECONDARY_MI2S_TX:
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 		ext_ec_ref_port_id = AFE_PORT_ID_SECONDARY_MI2S_TX;
 		msm_route_ext_ec_ref = 2;
 #else
@@ -1603,7 +1603,7 @@ static int msm_routing_ext_ec_put(struct snd_kcontrol *kcontrol,
 		state = true;
 		break;
 	case EC_PORT_ID_TERTIARY_MI2S_TX:
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 		ext_ec_ref_port_id = AFE_PORT_ID_TERTIARY_MI2S_TX;
 		msm_route_ext_ec_ref = 3;
 #else
@@ -1612,7 +1612,7 @@ static int msm_routing_ext_ec_put(struct snd_kcontrol *kcontrol,
 		state = true;
 		break;
 	case EC_PORT_ID_QUATERNARY_MI2S_TX:
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 		ext_ec_ref_port_id = AFE_PORT_ID_QUATERNARY_MI2S_TX;
 		msm_route_ext_ec_ref = 4;
 #else
@@ -1621,7 +1621,7 @@ static int msm_routing_ext_ec_put(struct snd_kcontrol *kcontrol,
 		state = true;
 		break;
 	default:
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 		ext_ec_ref_port_id = AFE_PORT_INVALID;
 		msm_route_ext_ec_ref = 0;
 #else
@@ -1629,7 +1629,7 @@ static int msm_routing_ext_ec_put(struct snd_kcontrol *kcontrol,
 #endif
 		break;
 	}
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	if (!voc_set_ext_ec_ref(ext_ec_ref_port_id, state)) {
 #else
 	if (!voc_set_ext_ec_ref(msm_route_ext_ec_ref, state)) {
@@ -1643,7 +1643,7 @@ static int msm_routing_ext_ec_put(struct snd_kcontrol *kcontrol,
 	return ret;
 }
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 static const char *const audio_ec_ref_rx[] = { "SLIM_RX", "I2S_RX", "PROXY_RX",
 	"PRI_MI2S_TX", "SEC_MI2S_TX", "TERT_MI2S_TX", "QUAT_MI2S_RX", "QUAT_MI2S_TX","NONE"};
 static const struct soc_enum msm_route_audio_ec_ref_rx_enum[] = {
@@ -1876,7 +1876,7 @@ static const struct snd_kcontrol_new quaternary_mi2s_rx_mixer_controls[] = {
 	SOC_SINGLE_EXT("MultiMedia9", MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
 	MSM_FRONTEND_DAI_MULTIMEDIA9, 1, 0, msm_routing_get_audio_mixer,
 	msm_routing_put_audio_mixer),
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	SOC_SINGLE_EXT("INTERNAL_FM_TX", MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
 	MSM_BACKEND_DAI_INT_FM_TX, 1, 0, msm_routing_get_port_mixer,
 	msm_routing_put_port_mixer),
@@ -1931,7 +1931,7 @@ static const struct snd_kcontrol_new secondary_mi2s_rx_mixer_controls[] = {
 	msm_routing_put_audio_mixer),
 };
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 static const struct snd_kcontrol_new quaternary_mi2s_rx_port_mixer_controls[] = {
 	SOC_SINGLE_EXT("INTERNAL_FM_TX", MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
 	MSM_BACKEND_DAI_INT_FM_TX, 1, 0, msm_routing_get_port_mixer,
@@ -2417,7 +2417,7 @@ static const struct snd_kcontrol_new sec_mi2s_rx_voice_mixer_controls[] = {
 	msm_routing_put_voice_mixer),
 };
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 static const struct snd_kcontrol_new quat_mi2s_rx_voice_mixer_controls[] = {
 	SOC_SINGLE_EXT("CSVoice", MSM_BACKEND_DAI_QUATERNARY_MI2S_RX,
 	MSM_FRONTEND_DAI_CS_VOICE, 1, 0, msm_routing_get_voice_mixer,
@@ -2943,7 +2943,7 @@ static const struct snd_kcontrol_new pri_mi2s_rx_switch_mixer_controls =
 	SOC_SINGLE_EXT("Switch", SND_SOC_NOPM,
 	0, 1, 0, msm_routing_get_switch_mixer,
 	msm_routing_put_switch_mixer);
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 static const struct snd_kcontrol_new mi2s_switch_mixer_controls =
 	SOC_SINGLE_EXT("Switch", SND_SOC_NOPM,
 	0, 1, 0, msm_routing_get_mi2s_switch_mixer,
@@ -3646,7 +3646,7 @@ static const struct snd_soc_dapm_widget msm_qdsp6_widgets[] = {
 				&fm_switch_mixer_controls),
 	SND_SOC_DAPM_SWITCH("SLIMBUS4_DL_HL", SND_SOC_NOPM, 0, 0,
 				&fm_switch_mixer_controls),
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	SND_SOC_DAPM_SWITCH("QUAT_MI2S_DL_HL", SND_SOC_NOPM, 0, 0,
 				&mi2s_switch_mixer_controls),
 #endif
@@ -3681,7 +3681,7 @@ static const struct snd_soc_dapm_widget msm_qdsp6_widgets[] = {
 	SND_SOC_DAPM_MIXER("QUAT_MI2S_RX Audio Mixer", SND_SOC_NOPM, 0, 0,
 				quaternary_mi2s_rx_mixer_controls,
 				ARRAY_SIZE(quaternary_mi2s_rx_mixer_controls)),
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	SND_SOC_DAPM_MIXER("QUAT_MI2S_RX Port Mixer", SND_SOC_NOPM, 0, 0,
 			   quaternary_mi2s_rx_port_mixer_controls,
 			   ARRAY_SIZE(quaternary_mi2s_rx_port_mixer_controls)),
@@ -3740,7 +3740,7 @@ static const struct snd_soc_dapm_widget msm_qdsp6_widgets[] = {
 				SND_SOC_NOPM, 0, 0,
 				slimbus_rx_voice_mixer_controls,
 				ARRAY_SIZE(slimbus_rx_voice_mixer_controls)),
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	SND_SOC_DAPM_MIXER("QUAT_MI2S_RX_Voice Mixer",
 				SND_SOC_NOPM, 0, 0,
 				quat_mi2s_rx_voice_mixer_controls,
@@ -3837,7 +3837,7 @@ static const struct snd_soc_dapm_widget msm_qdsp6_widgets[] = {
 	/* Virtual Pins to force backends ON atm */
 	SND_SOC_DAPM_OUTPUT("BE_OUT"),
 	SND_SOC_DAPM_INPUT("BE_IN"),
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	SND_SOC_DAPM_MUX("AUDIO_EXT_EC MUX", SND_SOC_NOPM, 0, 0,
 			&audio_ext_ec_mux),
 #endif
@@ -3953,11 +3953,11 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"QUAT_MI2S_RX Audio Mixer", "MultiMedia6", "MM_DL6"},
 	{"QUAT_MI2S_RX Audio Mixer", "MultiMedia7", "MM_DL7"},
 	{"QUAT_MI2S_RX Audio Mixer", "MultiMedia8", "MM_DL8"},
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	{"QUAT_MI2S_RX Audio Mixer", "SLIM_0_TX", "SLIMBUS_0_TX"},
 #endif
 	{"QUAT_MI2S_RX", NULL, "QUAT_MI2S_RX Audio Mixer"},
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	{"QUAT_MI2S_RX Audio Mixer", "INTERNAL_FM_TX", "INT_FM_TX"},
 	{"QUAT_MI2S_RX Port Mixer", "INTERNAL_FM_TX", "INT_FM_TX"},
 #endif
@@ -4114,7 +4114,7 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"SEC_MI2S_RX_Voice Mixer", "QCHAT", "QCHAT_DL"},
 	{"SEC_MI2S_RX", NULL, "SEC_MI2S_RX_Voice Mixer"},
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	{"QUAT_MI2S_RX_Voice Mixer", "CSVoice", "CS-VOICE_DL1"},
 	{"QUAT_MI2S_RX_Voice Mixer", "Voice2", "VOICE2_DL"},
 	{"QUAT_MI2S_RX_Voice Mixer", "VoLTE", "VoLTE_DL"},
@@ -4242,7 +4242,7 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"MM_UL8", NULL, "AUDIO_REF_EC_UL8 MUX"},
 	{"MM_UL9", NULL, "AUDIO_REF_EC_UL9 MUX"},
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	{"AUDIO_EXT_EC MUX", "PRI_MI2S_TX" , "PRI_MI2S_TX"},
 	{"AUDIO_EXT_EC MUX", "SEC_MI2S_TX" , "SEC_MI2S_TX"},
 	{"AUDIO_EXT_EC MUX", "TERT_MI2S_TX" , "TERT_MI2S_TX"},
@@ -4395,13 +4395,13 @@ static const struct snd_soc_dapm_route intercon[] = {
 	{"PRI_MI2S_RX_DL_HL", "Switch", "PRI_MI2S_DL_HL"},
 	{"PRI_MI2S_RX", NULL, "PRI_MI2S_RX_DL_HL"},
 	{"MI2S_UL_HL", NULL, "TERT_MI2S_TX"},
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	{"MI2S_UL_HL", NULL, "QUAT_MI2S_TX"},
 #endif
 	{"SEC_I2S_RX", NULL, "SEC_I2S_DL_HL"},
 	{"PRI_MI2S_UL_HL", NULL, "PRI_MI2S_TX"},
 	{"SEC_MI2S_RX", NULL, "SEC_MI2S_DL_HL"},
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 	{"QUAT_MI2S_DL_HL", "Switch", "QUAT_MI2S_RX"},
 #endif
 
