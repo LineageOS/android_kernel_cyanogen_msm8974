@@ -1,0 +1,69 @@
+/*
+ * Copyright (c) 2012-2013, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&soc {
+	qcom,mdss_dsi@fd922800 {
+		qcom,dsi-pref-prim-pan = <&dsi_lgd_r63319_WQHD_vid0>;
+	};	
+
+	qcom,mdss_dsi@fd922e00 {
+		qcom,dsi-pref-prim-pan = <&dsi_lgd_r63319_WQHD_vid1>;
+	};	
+
+	qcom,mdss_mdp@fd900000 {
+		qcom,mdss-pref-prim-intf = "dsi";
+		batfet-supply = <&pm8941_chg_batif>;
+	};
+
+	qcom,hdmi_tx@fd922100 {
+		status = "disabled";
+	};
+};
+
+&mdss_mdp {
+	qcom,mdss-ad-off = <>;
+};
+
+&mdss_fb0 {
+	qcom,memory-reservation-type = "EBI1";
+	qcom,memory-reservation-size = <0x2a30000>;
+	qcom,memblock-reserve = <0x03200000 0x01E00000>;
+	qcom,mdss-fb-split = <720 720>;
+};
+
+&mdss_dsi0 {
+	qcom,platform-vsn-gpio = <&msmgpio 14 0>;
+	qcom,platform-vsp-gpio = <&msmgpio 16 0>;
+	qcom,platform-reset-gpio = <&pm8941_gpios 19 0>;
+	qcom,platform-enable-gpio = <&pm8941_gpios 13 0>;
+	qcom,platform-outdoor-gpio = <&msmgpio 64 0>;
+	qcom,platform-te-gpio = <&msmgpio 12 0>;
+
+	qcom,platform-lane-config = [
+			00 00 00 00 00 00 00 01 97
+			00 00 00 00 05 00 00 01 97
+			00 00 00 00 0a 00 00 01 97
+			00 00 00 00 0f 00 00 01 97
+			00 c0 00 00 00 00 00 01 bb
+	];
+};
+
+&mdss_dsi1 {
+	qcom,platform-lane-config = [
+			00 00 00 00 00 00 00 01 97
+			00 00 00 00 05 00 00 01 97
+			00 00 00 00 0a 00 00 01 97
+			00 00 00 00 0f 00 00 01 97
+			00 c0 00 00 00 00 00 01 bb
+	];
+};
