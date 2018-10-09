@@ -31,14 +31,12 @@
 #include <linux/of_gpio.h>
 #include "synaptics_s3408.h"
 #include <linux/input/mt.h>
-#include <linux/jiffies.h>
 
 #define DRIVER_NAME "synaptics_rmi4_i2c"
 #define INPUT_PHYS_NAME "synaptics_rmi4_i2c/input0"
 #define DEBUGFS_DIR_NAME "ts_debug"
 
 #define RESET_DELAY 100
-#define POWER_RESET_DELAY 100
 
 #define TYPE_B_PROTOCOL
 
@@ -106,8 +104,6 @@ static int synaptics_rmi4_i2c_write(struct synaptics_rmi4_data *rmi4_data,
 
 static int synaptics_rmi4_reset_device(struct synaptics_rmi4_data *rmi4_data);
 
-static int synaptics_rmi4_power_reset(struct synaptics_rmi4_data *rmi4_data);
-
 static void synaptics_rmi4_sensor_wake(struct synaptics_rmi4_data *rmi4_data);
 
 static void __maybe_unused synaptics_rmi4_sensor_sleep(
@@ -159,12 +155,6 @@ static ssize_t synaptics_rmi4_flipy_show(struct device *dev,
 		struct device_attribute *attr, char *buf);
 
 static ssize_t synaptics_rmi4_flipy_store(struct device *dev,
-		struct device_attribute *attr, const char *buf, size_t count);
-
-static ssize_t synaptics_rmi4_gesture_show(struct device *dev,
-		struct device_attribute *attr, char *buf);
-
-static ssize_t synaptics_rmi4_gesture_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t count);
 
 
@@ -413,9 +403,6 @@ static struct device_attribute attrs[] = {
 	__ATTR(flipy, (S_IRUGO | S_IWUSR | S_IWGRP),
 			synaptics_rmi4_flipy_show,
 			synaptics_rmi4_flipy_store),
-	__ATTR(gesture, (S_IRUGO | S_IWUSR | S_IWGRP),
-			synaptics_rmi4_gesture_show,
-			synaptics_rmi4_gesture_store),
 };
 
 static bool exp_fn_inited;
@@ -657,31 +644,6 @@ static ssize_t synaptics_rmi4_flipy_store(struct device *dev,
 	return count;
 }
 
-static ssize_t synaptics_rmi4_gesture_show(struct device *dev,
-	struct device_attribute *attr, char *buf)
-{
-	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
-
-	return snprintf(buf, PAGE_SIZE, "%u\n",
-		rmi4_data->gesture.enabled);
-}
-
-static ssize_t synaptics_rmi4_gesture_store(struct device *dev,
-	struct device_attribute *attr, const char *buf, size_t count)
-{
-	int retval;
-	unsigned int input;
-	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
-
-	retval = kstrtouint(buf, 10, &input);
-	if (retval)
-		return retval;
-
-	rmi4_data->gesture.enabled = input > 0 ? 1 : 0;
-
-	return count;
-}
-
  /**
  * synaptics_rmi4_set_page()
  *
@@ -774,10 +736,6 @@ static int synaptics_rmi4_i2c_read(struct synaptics_rmi4_data *rmi4_data,
 		dev_err(&rmi4_data->i2c_client->dev,
 				"%s: I2C read over retry limit\n",
 				__func__);
-		dev_err(&rmi4_data->i2c_client->dev,
-				"%s: Do a power reset!\n",
-				__func__);
-		synaptics_rmi4_power_reset(rmi4_data);
 		retval = -EIO;
 	}
 
@@ -871,94 +829,6 @@ static void synaptics_rmi4_release_all(struct synaptics_rmi4_data *rmi4_data)
 	input_sync(rmi4_data->input_dev);
 }
 
-/*
-static int synaptics_rmi4_gesture_set_enabled(
-		struct synaptics_rmi4_data *rmi4_data, bool enable)
-{
-	rmi4_data->gesture.enabled = enable;
-
-	return 0;
-}
-*/
-
-static int synaptics_rmi4_f12_gesture_report(
-		struct synaptics_rmi4_data *rmi4_data,
-		struct synaptics_rmi4_f12_finger_data *data,
-		unsigned char fingers_to_process)
-{
-	unsigned char finger;
-	unsigned char finger_status;
-	struct synaptics_rmi4_f12_finger_data *finger_data;
-	unsigned long delta_jiffies;
-	unsigned int delta_x;
-	unsigned int delta_y;
-	bool finger_down = false;
-	int x;
-	int y;
-
-	for (finger = 0; finger < fingers_to_process; finger++)
-	{
-		finger_data = data + finger;
-		finger_status = finger_data->object_type_and_status & MASK_2BIT;
-
-		// Multiple finger touches
-		if (finger_status && finger_down)
-			goto reset_jiffies;
-
-		if (finger_status)
-			finger_down = true;
-	}
-
-	// Ooops
-	if (!finger_down)
-		goto exit;
-
-	// Get touch coords
-	x = (data->x_msb << 8) | (data->x_lsb);
-	y = (data->y_msb << 8) | (data->y_lsb);
-
-	if (rmi4_data->flip_x)
-		x = rmi4_data->sensor_max_x - x;
-	if (rmi4_data->flip_y)
-		y = rmi4_data->sensor_max_y - y;
-
-	delta_x = abs(x - rmi4_data->gesture.last_x);
-	delta_y = abs(y - rmi4_data->gesture.last_y);
-
-	rmi4_data->gesture.last_x = x;
-	rmi4_data->gesture.last_y = y;
-
-	delta_jiffies = get_jiffies_64() - rmi4_data->gesture.last_jiffies;
-	rmi4_data->gesture.last_jiffies = get_jiffies_64();
-
-	// Time delta check
-	if (delta_jiffies < rmi4_data->gesture.delta_jiffies_min
-			|| delta_jiffies > rmi4_data->gesture.delta_jiffies_max)
-		goto exit;
-
-	// Position delta check
-	if (delta_x > rmi4_data->gesture.delta_x_max
-			|| delta_y > rmi4_data->gesture.delta_y_max)
-		goto exit;
-
-	dev_err(&rmi4_data->i2c_client->dev,
-		"f12: Registered double tap at"
-		"x=%d, y=%d, delta_jiffies=%lu\n",
-		x, y, delta_jiffies);
-
-	input_report_key(rmi4_data->input_dev, KEY_WAKEUP, 1);
-	input_sync(rmi4_data->input_dev);
-	input_report_key(rmi4_data->input_dev, KEY_WAKEUP, 0);
-	input_sync(rmi4_data->input_dev);
-
-exit:
-	return 0;
-
-reset_jiffies:
-	rmi4_data->gesture.last_jiffies = 0;
-	return 0;
-}
-
  /**
  * synaptics_rmi4_f12_abs_report()
  *
@@ -1002,11 +872,6 @@ static int synaptics_rmi4_f12_abs_report(struct synaptics_rmi4_data *rmi4_data,
 
 	data = (struct synaptics_rmi4_f12_finger_data *)fhandler->data;
 
-	if (atomic_read(&rmi4_data->gesture.active)) {
-		return synaptics_rmi4_f12_gesture_report(
-			rmi4_data, data, fingers_to_process);
-	}
-
 	for (finger = 0; finger < fingers_to_process; finger++) {
 		finger_data = data + finger;
 		finger_status = finger_data->object_type_and_status & MASK_2BIT;
@@ -1023,6 +888,7 @@ static int synaptics_rmi4_f12_abs_report(struct synaptics_rmi4_data *rmi4_data,
 		input_mt_report_slot_state(rmi4_data->input_dev,
 				MT_TOOL_FINGER, finger_status != 0);
 #endif
+
 		if (finger_status) {
 			x = (finger_data->x_msb << 8) | (finger_data->x_lsb);
 			y = (finger_data->y_msb << 8) | (finger_data->y_lsb);
@@ -1099,10 +965,6 @@ static void synaptics_rmi4_f1a_report(struct synaptics_rmi4_data *rmi4_data,
 	static bool before_2d_status[MAX_NUMBER_OF_BUTTONS];
 	static bool while_2d_status[MAX_NUMBER_OF_BUTTONS];
 #endif
-
-	if (atomic_read(&rmi4_data->gesture.active)) {
-		return;
-	}
 
 	if (do_once) {
 		memset(current_status, 0, sizeof(current_status));
@@ -1702,19 +1564,6 @@ static int synaptics_rmi4_f12_init(struct synaptics_rmi4_data *rmi4_data,
 		retval = -ENOMEM;
 		goto free_function_handler_mem;
 	}
-
-	/* Gestures */
-	rmi4_data->gesture.enabled = false;
-	rmi4_data->gesture.delta_x_max = GESTURE_DELTA_X;
-	rmi4_data->gesture.delta_y_max = GESTURE_DELTA_Y;
-	rmi4_data->gesture.delta_jiffies_min =
-		msecs_to_jiffies(GESTURE_TIMEOUT_MIN_MS);
-	rmi4_data->gesture.delta_jiffies_max =
-		msecs_to_jiffies(GESTURE_TIMEOUT_MAX_MS);
-	rmi4_data->gesture.last_x = 0;
-	rmi4_data->gesture.last_y = 0;
-	rmi4_data->gesture.last_jiffies = 0;
-	atomic_set(&rmi4_data->gesture.active, 0);
 
 	return retval;
 
@@ -2602,30 +2451,6 @@ power_off:
 	return 0;
 }
 
-static int synaptics_rmi4_power_reset(struct synaptics_rmi4_data *rmi4_data)
-{
-	int retval = 0;
-
-	retval = synaptics_rmi4_power_on(rmi4_data, false);
-	if (retval < 0) {
-		dev_err(&rmi4_data->i2c_client->dev, "Failed to power off\n");
-		retval = -EIO;
-		goto exit;
-	}
-	mdelay(POWER_RESET_DELAY);
-
-	retval = synaptics_rmi4_power_on(rmi4_data, true);
-	if (retval < 0) {
-		dev_err(&rmi4_data->i2c_client->dev, "Failed to power on\n");
-		retval = -EIO;
-		goto exit;
-	}
-	mdelay(POWER_RESET_DELAY);
-
-exit:
-	return retval;
-}
-
 static int synaptics_rmi4_gpio_configure(struct synaptics_rmi4_data *rmi4_data,
 					bool on)
 {
@@ -2927,9 +2752,6 @@ static int synaptics_rmi4_probe(struct i2c_client *client,
 					EV_KEY, f1a->button_map[ii]);
 		}
 	}
-
-	// Gestures
-	input_set_capability(rmi4_data->input_dev, EV_KEY, KEY_WAKEUP);
 
 	retval = input_register_device(rmi4_data->input_dev);
 	if (retval) {
@@ -3458,13 +3280,6 @@ static int synaptics_rmi4_suspend(struct device *dev)
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
 	int retval;
 
-	if (rmi4_data->gesture.enabled) {
-		enable_irq_wake(rmi4_data->irq);
-		atomic_set(&rmi4_data->gesture.active, 1);
-		synaptics_rmi4_release_all(rmi4_data);
-		return 0;
-	}
-
 	if (rmi4_data->stay_awake) {
 		rmi4_data->staying_awake = true;
 		return 0;
@@ -3535,22 +3350,6 @@ static int synaptics_rmi4_resume(struct device *dev)
 {
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
 	int retval;
-
-	if (rmi4_data->gesture.enabled) {
-		disable_irq_wake(rmi4_data->irq);
-		atomic_set(&rmi4_data->gesture.active, 0);
-
-		// Issue reset command
-		retval = synaptics_rmi4_reset_command(rmi4_data);
-		if (retval < 0) {
-			dev_err(&rmi4_data->i2c_client->dev,
-				"%s: Failed to send command reset\n",
-				__func__);
-			return retval;
-		}
-
-		return 0;
-	}
 
 	if (rmi4_data->staying_awake)
 		return 0;
