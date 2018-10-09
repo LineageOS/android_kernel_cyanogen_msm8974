@@ -9,11 +9,17 @@
 #include <linux/i2c.h>
 
 #define I2C_SEQ_REG_SETTING_MAX   5
+#ifdef CONFIG_MACH_LENOVO_K920
+#define I2C_SEQ_REG_DATA_MAX      20
+#else
 #define I2C_SEQ_REG_DATA_MAX      256
+#endif
 #define I2C_REG_DATA_MAX          (8*1024)
 #define MAX_CID                   16
 
+#ifndef CONFIG_MACH_LENOVO_K920
 #define I2C_USER_REG_DATA_MAX 1024
+#endif
 
 #define MSM_SENSOR_MCLK_8HZ   8000000
 #define MSM_SENSOR_MCLK_16HZ  16000000
@@ -51,20 +57,26 @@
 #define MSM_ACTUATOR_MOVE_SIGNED_FAR -1
 #define MSM_ACTUATOR_MOVE_SIGNED_NEAR  1
 
+#ifdef CONFIG_MACH_LENOVO_K920
+#define ONSEMI_LC_MODULE 1
+#endif
+
 #define MAX_EEPROM_NAME 32
 
 #define MAX_AF_ITERATIONS 3
 #define MAX_NUMBER_OF_STEPS 47
 #define MAX_POWER_CONFIG 12
 
-#ifdef CONFIG_MACH_SHENQI_K9
+#if defined(CONFIG_MACH_SHENQI_K9) || defined(CONFIG_MACH_LENOVO_K920)
 #define MAX_LED_TRIGGERS 3
 #endif
 
+#ifndef CONFIG_MACH_LENOVO_K920
 typedef enum sensor_stats_type {
 	YRGB,
 	YYYY,
 } sensor_stats_type_t;
+#endif
 
 enum flash_type {
 	LED_FLASH = 1,
@@ -267,6 +279,9 @@ enum cci_i2c_master_t {
 struct msm_camera_i2c_reg_array {
 	uint16_t reg_addr;
 	uint16_t reg_data;
+#ifdef CONFIG_MACH_LENOVO_K920
+	uint16_t reg_data_type;
+#endif
 	uint32_t delay;
 };
 
@@ -400,8 +415,24 @@ struct msm_camera_sensor_slave_info {
 	struct msm_sensor_init_params sensor_init_params;
 };
 
+#ifdef CONFIG_OV5693
+struct msm_sensor_otp_params {
+	int customer_id;
+	int module_integrator_id;
+	int lens_id;
+	int rg_ratio;
+	int bg_ratio;
+	int user_data[2];
+	int light_rg;
+	int light_bg;
+};
+#endif
+
 struct sensorb_cfg_data {
 	int cfgtype;
+#ifdef CONFIG_OV5693
+	struct msm_sensor_otp_params *sensor_otp_params_ptr;
+#endif
 	union {
 		struct msm_sensor_info_t      sensor_info;
 		struct msm_sensor_init_params sensor_init_params;
@@ -435,6 +466,9 @@ enum eeprom_cfg_type_t {
 
 struct eeprom_get_t {
 	uint32_t num_bytes;
+#ifdef CONFIG_MACH_LENOVO_K920
+	uint8_t is_3a_checksumed;
+#endif
 };
 
 struct eeprom_read_t {
@@ -491,18 +525,31 @@ enum msm_sensor_cfg_type_t {
 	CFG_SET_WHITE_BALANCE,
 	CFG_SET_AUTOFOCUS,
 	CFG_CANCEL_AUTOFOCUS,
+#ifdef CONFIG_MACH_LENOVO_K920
+	CFG_SENSOR_OTP_PROC, // 25
+	CFG_SENSOR_GET_OTP,
+	CFG_WRITE_I2C_ARRAY_L, // add for byte or word i2c operation
+#endif
 };
 
 enum msm_actuator_cfg_type_t {
 	CFG_GET_ACTUATOR_INFO,
 	CFG_SET_ACTUATOR_INFO,
 	CFG_SET_DEFAULT_FOCUS,
+#ifdef CONFIG_MACH_LENOVO_K920
+	CFG_SET_POSITION,
+#endif
 	CFG_MOVE_FOCUS,
+#ifdef CONFIG_MACH_LENOVO_K920
+	CFG_SET_OIS_MODE,
+	CFG_SET_OIS_ENABLE,
+#else
 	CFG_SET_POSITION,
 	CFG_ACTUATOR_POWERDOWN,
 	CFG_ACTUATOR_POWERUP,
 #ifdef CONFIG_MSM_CAMERA_SENSOR_RHM_OIS_ACTUATOR
 	CFG_SET_ACTUATOR_OIS_INIT,
+#endif
 #endif
 };
 
@@ -521,6 +568,7 @@ enum msm_actuator_addr_type {
 	MSM_ACTUATOR_WORD_ADDR,
 };
 
+#ifndef CONFIG_MACH_LENOVO_K920
 enum msm_actuator_i2c_operation {
 	MSM_ACT_WRITE = 0,
 	MSM_ACT_POLL,
@@ -534,6 +582,28 @@ struct reg_settings_t {
 	enum msm_actuator_i2c_operation i2c_operation;
 	uint32_t delay;
 };
+#endif
+
+#ifdef CONFIG_MACH_LENOVO_K920
+struct reg_settings_t {
+	uint16_t reg_addr;
+	uint16_t reg_data;
+};
+
+struct lc_reg_settings_t {
+	uint16_t reg_addr;
+	uint16_t reg_data;
+	enum msm_camera_i2c_data_type reg_data_type;
+};
+
+struct lc_cal_data {
+	uint8_t lc_bias;
+	uint8_t lc_offset;
+	uint16_t lc_infinity;
+	uint16_t lc_macro;
+	uint8_t readed;
+};
+#endif
 
 struct region_params_t {
 	/* [0] = ForwardDirection Macro boundary
@@ -605,6 +675,10 @@ enum af_camera_name {
 	ACTUATOR_MAIN_CAM_3,
 	ACTUATOR_MAIN_CAM_4,
 	ACTUATOR_MAIN_CAM_5,
+#ifdef CONFIG_MACH_LENOVO_K920
+	ACTUATOR_MAIN_CAM_6,
+	ACTUATOR_MAIN_CAM_7,
+#endif
 	ACTUATOR_WEB_CAM_0,
 	ACTUATOR_WEB_CAM_1,
 	ACTUATOR_WEB_CAM_2,
@@ -626,6 +700,10 @@ struct msm_actuator_cfg_data {
 		struct msm_actuator_get_info_t get_info;
 		struct msm_actuator_set_position_t setpos;
 		enum af_camera_name cam_name;
+#ifdef CONFIG_MACH_LENOVO_K920
+		int cam_mode;
+		uint8_t ois_enable; // for enable/disable OIS
+#endif
 	} cfg;
 };
 
@@ -684,11 +762,19 @@ struct sensor_init_cfg_data {
 #define VIDIOC_MSM_SENSOR_GET_SUBDEV_ID \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 3, uint32_t)
 
+#ifdef CONFIG_MACH_LENOVO_K920
+#define VIDIOC_MSM_CSIPHY_IO_CFG \
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 4, struct csid_cfg_data)
+
+#define VIDIOC_MSM_CSID_IO_CFG \
+	_IOWR('V', BASE_VIDIOC_PRIVATE + 5, struct csiphy_cfg_data)
+#else
 #define VIDIOC_MSM_CSIPHY_IO_CFG \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 4, struct csiphy_cfg_data)
 
 #define VIDIOC_MSM_CSID_IO_CFG \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 5, struct csid_cfg_data)
+#endif
 
 #define VIDIOC_MSM_ACTUATOR_CFG \
 	_IOWR('V', BASE_VIDIOC_PRIVATE + 6, struct msm_actuator_cfg_data)
