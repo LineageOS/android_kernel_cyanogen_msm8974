@@ -25,6 +25,10 @@
 #include "mdss_dsi.h"
 #include "mdss_livedisplay.h"
 
+#ifdef CONFIG_FB_MSM_MDSS_LCD_EFFECT
+#include "mdss_lcd_effect.h"
+#endif
+
 #define DT_CMD_HDR 6
 
 #define MIN_REFRESH_RATE 30
@@ -1353,6 +1357,14 @@ int mdss_dsi_panel_init(struct device_node *node,
 	ctrl_pdata->off = mdss_dsi_panel_off;
 	ctrl_pdata->panel_data.set_backlight = mdss_dsi_panel_bl_ctrl;
 	ctrl_pdata->switch_mode = mdss_dsi_panel_switch_mode;
+
+#ifdef CONFIG_FB_MSM_MDSS_LCD_EFFECT
+	rc = mdss_lcd_effect_init(pinfo);
+	if (rc) {
+		pr_err("%s:%d failed to initialize lcd_effect\n", __func__, __LINE__);
+		return rc;
+	}
+#endif
 
 	return 0;
 }

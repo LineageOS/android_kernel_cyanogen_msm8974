@@ -297,6 +297,10 @@ struct mdss_mdp_pp_tear_check {
 
 struct mdss_livedisplay_ctx;
 
+#ifdef CONFIG_FB_MSM_MDSS_LCD_EFFECT
+struct mdss_lcd_effect_ctx;
+#endif
+
 struct mdss_panel_info {
 	u32 xres;
 	u32 yres;
@@ -364,6 +368,10 @@ struct mdss_panel_info {
 	struct edp_panel_info edp;
 
 	struct mdss_livedisplay_ctx *livedisplay;
+
+#ifdef CONFIG_FB_MSM_MDSS_LCD_EFFECT
+	struct mdss_lcd_effect_ctx *lcd_effect;
+#endif
 };
 
 struct mdss_panel_data {

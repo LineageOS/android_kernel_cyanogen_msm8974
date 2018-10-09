@@ -27,6 +27,10 @@
 #include "mdss_dsi.h"
 #include "mdss_debug.h"
 
+#ifdef CONFIG_FB_MSM_MDSS_LCD_EFFECT
+#include "mdss_lcd_effect.h"
+#endif
+
 static int mdss_dsi_regulator_init(struct platform_device *pdev)
 {
 	struct mdss_dsi_ctrl_pdata *ctrl_pdata = NULL;
@@ -782,6 +786,11 @@ static int mdss_dsi_unblank(struct mdss_panel_data *pdata)
 				mdss_dsi_set_tear_on(ctrl_pdata);
 		}
 	}
+
+#ifdef CONFIG_FB_MSM_MDSS_LCD_EFFECT
+	mdss_lcd_effect_update(pdata->panel_info.lcd_effect,
+			LCDE_UPDATE_ALL);
+#endif
 
 	pr_debug("%s-:\n", __func__);
 
