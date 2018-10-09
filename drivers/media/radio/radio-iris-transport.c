@@ -205,8 +205,15 @@ static void radio_hci_smd_deregister(void)
 	hs.fm_channel = 0;
 	fmsmd_set = 0;
 }
-
+#ifdef CONFIG_MACH_LENOVO_K920
+#ifdef MODULE
 static int radio_hci_smd_init(void)
+#else
+int radio_hci_smd_init(void)
+#endif
+#else
+static int radio_hci_smd_init(void)
+#endif
 {
 	return radio_hci_smd_register_dev(&hs);
 }
