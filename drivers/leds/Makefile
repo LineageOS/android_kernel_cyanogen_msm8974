@@ -22,7 +22,11 @@ obj-$(CONFIG_LEDS_PM8XXX)		+= leds-pm8xxx.o
 ifeq ($(CONFIG_MACH_SHENQI_K9),y)
 obj-$(CONFIG_MACH_SHENQI_K9)		+= leds-qpnp-shenqi-k9.o
 else
+ifeq ($(CONFIG_MACH_LENOVO_K920),y)
+obj-$(CONFIG_MACH_LENOVO_K920)		+= leds-qpnp-lenovo-k920.o
+else
 obj-$(CONFIG_LEDS_QPNP)			+= leds-qpnp.o
+endif
 endif
 obj-$(CONFIG_LEDS_GPIO_REGISTER)	+= leds-gpio-register.o
 obj-$(CONFIG_LEDS_GPIO)			+= leds-gpio.o
